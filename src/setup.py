@@ -36,7 +36,7 @@ import resources_rc
 
 from theme import *
 
-APP_NAME = "Python Qt5 MDI Anwendung"
+APP_NAME = "IIS Setup v.0.0.1 (c) 2026 Jens Kallup - paule32"
 HELP_FILE = os.path.join("data", "help", "help.chm")
 
 def get_windows_countries():
