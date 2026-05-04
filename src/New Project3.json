@@ -7,19 +7,14 @@
         "name": "New Project"
     },
     "client_authority": {
-        "common_name": "yyyyy111112222xxxxx333",
+        "common_name": "yyyyy111",
         "organisation": "",
         "organisation_unit": "",
         "location": "",
         "country": "DE",
-        "algorithm": "RSA",
-        "key_size": "4096",
-        "not_before": "2026-05-04",
-        "not_after": "2036-05-04",
-        "basic_constraints": true,
         "usage": "trusted_ca",
-        "store": "ca_store",
-        "scope": "current_user"
+        "store": "my",
+        "scope": "local_machine"
     },
     "client_certs": []
 }

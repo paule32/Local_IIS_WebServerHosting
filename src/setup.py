@@ -20,13 +20,14 @@ from PyQt5.QtCore    import (
     Qt, QDate
 )
 from PyQt5.QtGui     import (
-    QPalette, QFont
+    QPalette, QFont, QFontMetrics
 )
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QMdiArea, QMdiSubWindow, QGroupBox, QDateEdit,
     QWidget, QVBoxLayout, QLabel, QAction, QFileDialog, QRadioButton,
     QMessageBox, QDockWidget, QToolBar, QTextEdit, QComboBox, QHBoxLayout,
-    QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox
+    QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox,
+    QScrollArea, QSizePolicy
 )
 
 # -----------------------------------------------------------------------
@@ -36,7 +37,7 @@ import resources_rc
 
 from theme import *
 
-APP_NAME = "IIS Setup v.0.0.1 (c) 2026 Jens Kallup - paule32"
+APP_NAME  = "IIS Setup v.0.0.1 (c) 2026 Jens Kallup - paule32"
 HELP_FILE = os.path.join("data", "help", "help.chm")
 
 def get_windows_countries():
@@ -76,6 +77,18 @@ def get_windows_countries():
     return sorted(result.items())
 
 
+class ProjectMdiSubWindow(QMdiSubWindow):
+    def closeEvent(self, event):
+        widget = self.widget()
+
+        if widget is not None and hasattr(widget, "request_close"):
+            if not widget.request_close():
+                event.ignore()
+                return
+
+        super().closeEvent(event)
+
+
 class ProjectButton(QPushButton):
     def __init__(self, main_window, project_file, project_data, parent=None):
         super().__init__(parent)
@@ -83,9 +96,30 @@ class ProjectButton(QPushButton):
         self.main_window = main_window
         self.project_file = project_file
         self.project_data = project_data
+        self.project_name = project_data.get("project", {}).get("name", "New Project")
 
-        self.setText(project_data.get("project", {}).get("name", "New Project"))
+        self.setMinimumHeight(28)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.update_project_text()
         self.clicked.connect(self.on_clicked)
+
+    def update_project_text(self):
+        metrics = QFontMetrics(self.font())
+        display_text = metrics.elidedText(self.project_name, Qt.ElideRight, 110)
+
+        self.setText(display_text)
+        self.setProperty("project_name", self.project_name)
+        self.setToolTip(self.project_name)
+
+    def enterEvent(self, event):
+        metrics = QFontMetrics(self.main_window.statusBar().font())
+        status_text = metrics.elidedText(self.project_name, Qt.ElideRight, 200)
+        self.main_window.statusBar().showMessage(status_text)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.main_window.statusBar().showMessage("Bereit")
+        super().leaveEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_F2:
@@ -112,8 +146,9 @@ class ProjectButton(QPushButton):
         if not new_name:
             return
 
-        self.setText(new_name)
+        self.project_name = new_name
         self.project_data["project"]["name"] = new_name
+        self.update_project_text()
         self.main_window.save_project_file(self.project_file, self.project_data)
 
     def on_clicked(self):
@@ -134,26 +169,32 @@ class CaAuthorityWindow(QWidget):
         self.project_data = project_data
         
         self.setFont(QFont("Arial", 10))
+        self.setProperty("changed", False)
 
         main_layout = QVBoxLayout(self)
 
         form_layout = QFormLayout()
 
-        self.edit_common_name = QLineEdit()
-        self.edit_organisation = QLineEdit()
+        self.edit_common_name       = QLineEdit()
+        self.edit_organisation      = QLineEdit()
         self.edit_organisation_unit = QLineEdit()
-        self.edit_location = QLineEdit()
+        self.edit_location          = QLineEdit()
 
+        self.edit_common_name       .setPlaceholderText("My Test Root CA")
+        self.edit_organisation      .setPlaceholderText("My Company Root CA")
+        self.edit_organisation_unit .setPlaceholderText("IT Department")
+        self.edit_location          .setPlaceholderText("London")
+        
         self.combo_country = QComboBox()
 
         for code, name in get_windows_countries():
             self.combo_country.addItem(f"{code} - {name}", code)
 
-        form_layout.addRow("Common Name:", self.edit_common_name)
-        form_layout.addRow("Organisation:", self.edit_organisation)
+        form_layout.addRow("Common Name:",       self.edit_common_name)
+        form_layout.addRow("Organisation:",      self.edit_organisation)
         form_layout.addRow("Organisation Unit:", self.edit_organisation_unit)
-        form_layout.addRow("Location:", self.edit_location)
-        form_layout.addRow("Country:", self.combo_country)
+        form_layout.addRow("Location:",          self.edit_location)
+        form_layout.addRow("Country:",           self.combo_country)
 
         main_layout.addLayout(form_layout)
         crypto_layout = QHBoxLayout()
@@ -252,7 +293,91 @@ class CaAuthorityWindow(QWidget):
         self.radio_current_user.setChecked(True)
 
         self.load_from_project()
+        
+        self.setup_change_tracking()
+        self.set_changed(False)
 
+    def setup_change_tracking(self):
+        widgets = [
+            self.edit_common_name,
+            self.edit_organisation,
+            self.edit_organisation_unit,
+            self.edit_location
+        ]
+
+        for widget in widgets:
+            widget.textChanged.connect(self.mark_changed)
+
+        combos = [
+            self.combo_country,
+            self.combo_algorithm,
+            self.combo_key_size
+        ]
+
+        for combo in combos:
+            combo.currentIndexChanged.connect(self.mark_changed)
+
+        dates = [
+            self.date_not_before,
+            self.date_not_after
+        ]
+
+        for date_edit in dates:
+            date_edit.dateChanged.connect(self.mark_changed)
+
+        checks = [
+            self.check_basic_constraints,
+            self.radio_trusted_ca,
+            self.radio_server_cert,
+            self.radio_iis,
+            self.radio_root,
+            self.radio_ca_store,
+            self.radio_personal,
+            self.radio_local_machine,
+            self.radio_current_user
+        ]
+
+        for check in checks:
+            check.toggled.connect(self.mark_changed)
+
+    def mark_changed(self, *args):
+        self.set_changed(True)
+
+    def set_changed(self, state):
+        self.setProperty("changed", bool(state))
+
+    def is_changed(self):
+        return bool(self.property("changed"))
+
+    def request_close(self):
+        if not self.is_changed():
+            return True
+
+        result = QMessageBox.question(
+            self,
+            "Änderungen speichern",
+            "Es wurden Änderungen vorgenommen. Möchten Sie diese vor dem Schließen speichern?",
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            QMessageBox.Cancel
+        )
+
+        if result == QMessageBox.Yes:
+            self.save_to_project()
+            self.main_window.save_project_file(
+                self.main_window.current_project_file,
+                self.main_window.current_project_data
+            )
+            self.set_changed(False)
+            return True
+
+        if result == QMessageBox.No:
+            return True
+
+        return False
+
+    def on_algorithm_changed(self, text):
+        self.combo_key_size.setEnabled(text == "RSA")
+    
     def on_algorithm_changed(self, text):
         self.combo_key_size.setEnabled(text == "RSA")
         
@@ -346,6 +471,67 @@ class CaAuthorityWindow(QWidget):
         }
 
     def on_create_ca_button_clicked(self):
+        self.store_scope = ""
+        self.store_name  = ""
+        
+        if not self.edit_common_name.text().split():
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: common name is empty")
+            return
+            
+        if not self.edit_organisation.text().split():
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: organisation name is empty")
+            return
+            
+        if not self.edit_organisation_unit.text().split():
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: organisation unit name is empty")
+            return
+            
+        if not self.edit_location.text().split():
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: location name is empty")
+            return
+            
+        not_before = self.date_not_before.date()
+        not_after  = self.date_not_after .date()
+        
+        if not_before >= not_after:
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: Not Before must be lesser as Not After.")
+            return
+        
+        if self.radio_current_user.isChecked():
+            self.store_scope = "CurrentUser"
+        else:
+            self.store_scope = "LocalMachine"
+        
+        if self.radio_root.isChecked():
+            self.store_name = "Root"
+        elif self.radio_ca_store.isChecked():
+            self.store_name = "CA"
+        else:
+            self.store_name = "My"
+        
+        if not self.store_scope:
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: store scope is unknown.")
+            return
+        
+        if not self.store_name:
+            QMessageBox.warning(self,
+            "Create CA",
+            "Error: store name is unknown.")
+            return
+        
+        
         print("create")
 
 class ClientCertsWindow(QWidget):
@@ -364,12 +550,14 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(APP_NAME)
         self.resize(800, 600)
+        self.setFont(QFont("Arial", 10))
 
         self.current_project_file = None
         self.current_project_data = None
         self.current_ca_window = None
         
         self.mdi = QMdiArea()
+        self.mdi.setFont(QFont("Arial", 10))
         self.mdi.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.mdi.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         
@@ -386,15 +574,43 @@ class MainWindow(QMainWindow):
     def create_sidebar(self):
         self.sidebar = QDockWidget("Sidebar", self)
         self.sidebar.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.sidebar.setMinimumWidth(120)
+        self.sidebar.resize(156, self.sidebar.height())
 
         self.sidebar_widget = QWidget()
-        self.sidebar_layout = QVBoxLayout(self.sidebar_widget)
+        self.sidebar_outer_layout = QVBoxLayout(self.sidebar_widget)
+        self.sidebar_outer_layout.setContentsMargins(4, 4, 4, 4)
+        self.sidebar_outer_layout.setSpacing(4)
 
-        self.sidebar_layout.addWidget(QLabel("Projects"))
+        self.sidebar_outer_layout.addWidget(QLabel("Projects"))
+
+        self.sidebar_scroll_up = QPushButton("▲")
+        self.sidebar_scroll_up.setFixedHeight(24)
+        self.sidebar_scroll_up.clicked.connect(self.scroll_sidebar_up)
+        self.sidebar_outer_layout.addWidget(self.sidebar_scroll_up)
+
+        self.sidebar_scroll_area = QScrollArea()
+        self.sidebar_scroll_area.setWidgetResizable(True)
+        self.sidebar_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.sidebar_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        self.sidebar_projects_widget = QWidget()
+        self.sidebar_layout = QVBoxLayout(self.sidebar_projects_widget)
+        self.sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        self.sidebar_layout.setSpacing(4)
         self.sidebar_layout.addStretch()
+
+        self.sidebar_scroll_area.setWidget(self.sidebar_projects_widget)
+        self.sidebar_outer_layout.addWidget(self.sidebar_scroll_area)
+
+        self.sidebar_scroll_down = QPushButton("▼")
+        self.sidebar_scroll_down.setFixedHeight(24)
+        self.sidebar_scroll_down.clicked.connect(self.scroll_sidebar_down)
+        self.sidebar_outer_layout.addWidget(self.sidebar_scroll_down)
 
         self.sidebar.setWidget(self.sidebar_widget)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.sidebar)
+        self.resizeDocks([self.sidebar], [156], Qt.Horizontal)
 
     def create_actions(self):
         self.act_new_project = QAction("Project", self)
@@ -430,8 +646,33 @@ class MainWindow(QMainWindow):
 
     def create_menus(self):
         menu_file = self.menuBar().addMenu("File")
-        self.menuBar().setFont(QFont("Arial", 10))
-        self.menuBar().font().setBold(True)
+
+        menu_font = QFont("Arial", 10)
+        menu_font.setBold(True)
+        self.menuBar().setFont(menu_font)
+        self.menuBar().setStyleSheet("""
+QMenuBar {
+    color: #ffd866;
+    font-family: Arial;
+    font-size: 10pt;
+    font-weight: bold;
+}
+QMenuBar::item {
+    color: #ffd866;
+}
+QMenuBar::item:selected {
+    background-color: #5a1020;
+}
+QMenu {
+    color: #ffd866;
+    font-family: Arial;
+    font-size: 10pt;
+    font-weight: bold;
+}
+QMenu::item:selected {
+    background-color: #5a1020;
+}
+""")
         
         menu_new = menu_file.addMenu("New")
         menu_new.addAction(self.act_new_project)
@@ -466,6 +707,14 @@ class MainWindow(QMainWindow):
     def create_statusbar(self):
         self.statusBar().showMessage("Bereit")
 
+    def scroll_sidebar_up(self):
+        scrollbar = self.sidebar_scroll_area.verticalScrollBar()
+        scrollbar.setValue(scrollbar.value() - 48)
+
+    def scroll_sidebar_down(self):
+        scrollbar = self.sidebar_scroll_area.verticalScrollBar()
+        scrollbar.setValue(scrollbar.value() + 48)
+
     def find_project_window(self, project_file, window_role):
         normalized = os.path.abspath(project_file)
 
@@ -477,7 +726,7 @@ class MainWindow(QMainWindow):
         return None
         
     def add_mdi_widget(self, widget, title, width=700, height=500):
-        sub = QMdiSubWindow()
+        sub = ProjectMdiSubWindow()
         sub.setAttribute(Qt.WA_DeleteOnClose, True)
         sub.setWidget(widget)
         sub.setWindowTitle(title)
@@ -750,6 +999,59 @@ class MainWindow(QMainWindow):
 
     def on_ca_window_destroyed(self):
         self.current_ca_window = None
+
+    def closeEvent(self, event):
+        changed_widgets = []
+
+        for sub in self.mdi.subWindowList():
+            widget = sub.widget()
+
+            if widget is not None and hasattr(widget, "is_changed"):
+                if widget.is_changed():
+                    changed_widgets.append(widget)
+
+        if changed_widgets:
+            result = QMessageBox.question(
+                self,
+                "Änderungen speichern",
+                "Es wurden Änderungen vorgenommen. Möchten Sie diese vor dem Beenden speichern?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                QMessageBox.Cancel
+            )
+
+            if result == QMessageBox.Yes:
+                for widget in changed_widgets:
+                    if hasattr(widget, "save_to_project"):
+                        widget.save_to_project()
+
+                if self.current_project_file and self.current_project_data:
+                    self.save_project_file(
+                        self.current_project_file,
+                        self.current_project_data
+                    )
+
+                event.accept()
+                return
+
+            if result == QMessageBox.No:
+                event.accept()
+                return
+
+            event.ignore()
+            return
+
+        result = QMessageBox.question(
+            self,
+            "Anwendung schließen",
+            "Möchten Sie die Anwendung wirklich schließen?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if result == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
         
     def on_about(self):
         QMessageBox.about(
