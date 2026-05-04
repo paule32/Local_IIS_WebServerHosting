@@ -1,0 +1,20 @@
+{
+    "header": {
+        "version": "1.0",
+        "app": "iis setup"
+    },
+    "project": {
+        "name": "New Project"
+    },
+    "client_authority": {
+        "common_name": "yyyyy111",
+        "organisation": "",
+        "organisation_unit": "",
+        "location": "",
+        "country": "DE",
+        "usage": "trusted_ca",
+        "store": "my",
+        "scope": "local_machine"
+    },
+    "client_certs": []
+}
