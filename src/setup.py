@@ -17,7 +17,7 @@ from   ctypes import wintypes
 # Qt Backend Factory + Property Mapping
 # -----------------------------------------------------------------------
 from PyQt5.QtCore    import (
-    Qt, QDate
+    Qt, QDate, QThread, pyqtSignal
 )
 from PyQt5.QtGui     import (
     QPalette, QFont, QFontMetrics
@@ -26,8 +26,8 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QMdiArea, QMdiSubWindow, QGroupBox, QDateEdit,
     QWidget, QVBoxLayout, QLabel, QAction, QFileDialog, QRadioButton,
     QMessageBox, QDockWidget, QToolBar, QTextEdit, QComboBox, QHBoxLayout,
-    QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox,
-    QScrollArea, QSizePolicy
+    QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox, QDialog,
+    QScrollArea, QSizePolicy, QPlainTextEdit
 )
 
 # -----------------------------------------------------------------------
@@ -75,6 +75,111 @@ def get_windows_countries():
     
     EnumSystemLocalesEx(LOCALE_ENUMPROCEX(callback), 0, 0, None)
     return sorted(result.items())
+
+
+class PowerShellWorker(QThread):
+    output = pyqtSignal(str)
+    error = pyqtSignal(str)
+    finished_ok = pyqtSignal()
+    finished_error = pyqtSignal(int)
+
+    def __init__(self, ps_script, parent=None):
+        super().__init__(parent)
+        self.ps_script = ps_script
+        self.process = None
+
+    def run(self):
+        try:
+            self.process = subprocess.Popen(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-ExecutionPolicy", "Bypass",
+                    "-Command", self.ps_script
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+
+            for line in self.process.stdout:
+                self.output.emit(line.rstrip())
+
+            for line in self.process.stderr:
+                self.error.emit(line.rstrip())
+
+            return_code = self.process.wait()
+
+            if return_code == 0:
+                self.finished_ok.emit()
+            else:
+                self.finished_error.emit(return_code)
+
+        except Exception as e:
+            self.error.emit(str(e))
+            self.finished_error.emit(-1)
+
+    def stop(self):
+        if self.process and self.process.poll() is None:
+            self.process.terminate()
+
+
+class PowerShellOutputDialog(QDialog):
+    def __init__(self, ps_script, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle("PowerShell Output")
+        self.resize(640, 480)
+
+        layout = QVBoxLayout(self)
+
+        self.output = QPlainTextEdit()
+        self.output.setReadOnly(True)
+        self.output.setFont(QFont("Consolas", 10))
+
+        self.btn_close = QPushButton("Close")
+        self.btn_close.setEnabled(False)
+        self.btn_close.clicked.connect(self.close)
+
+        layout.addWidget(self.output)
+        layout.addWidget(self.btn_close)
+
+        self.worker = PowerShellWorker(ps_script, self)
+        self.worker.output.connect(self.append_stdout)
+        self.worker.error.connect(self.append_stderr)
+        self.worker.finished_ok.connect(self.on_finished_ok)
+        self.worker.finished_error.connect(self.on_finished_error)
+
+        self.worker.start()
+
+    def append_stdout(self, text):
+        self.output.appendPlainText(text)
+
+    def append_stderr(self, text):
+        self.output.appendPlainText("[ERROR] " + text)
+
+    def on_finished_ok(self):
+        self.output.appendPlainText("")
+        self.output.appendPlainText("PowerShell-Skript erfolgreich ausgeführt.")
+        self.btn_close.setEnabled(True)
+
+    def on_finished_error(self, code):
+        self.output.appendPlainText("")
+        self.output.appendPlainText(f"PowerShell wurde mit Fehlercode {code} beendet.")
+        self.btn_close.setEnabled(True)
+
+        QMessageBox.critical(
+            self,
+            "PowerShell Fehler",
+            f"Das PowerShell-Skript wurde mit Fehlercode {code} beendet."
+        )
+
+    def closeEvent(self, event):
+        if self.worker.isRunning():
+            self.worker.stop()
+            self.worker.wait(2000)
+
+        super().closeEvent(event)
 
 
 class ProjectMdiSubWindow(QMdiSubWindow):
@@ -470,6 +575,10 @@ class CaAuthorityWindow(QWidget):
             "scope": scope
         }
 
+    def run_powershell_script(self, ps_script):
+        dlg = PowerShellOutputDialog(ps_script, self)
+        dlg.exec_()
+    
     def on_create_ca_button_clicked(self):
         self.store_scope = ""
         self.store_name  = ""
@@ -498,10 +607,10 @@ class CaAuthorityWindow(QWidget):
             "Error: location name is empty")
             return
             
-        not_before = self.date_not_before.date()
-        not_after  = self.date_not_after .date()
+        self.not_before = self.date_not_before.date()
+        self.not_after  = self.date_not_after .date()
         
-        if not_before >= not_after:
+        if self.not_before >= self.not_after:
             QMessageBox.warning(self,
             "Create CA",
             "Error: Not Before must be lesser as Not After.")
@@ -531,8 +640,62 @@ class CaAuthorityWindow(QWidget):
             "Error: store name is unknown.")
             return
         
-        
-        print("create")
+        pwsh_script = f"""
+$CommonName       = "{self.edit_common_name      .text()}"
+$Organisation     = "{self.edit_organisation     .text()}"
+$OrganisationUnit = "{self.edit_organisation_unit.text()}"
+$Location         = "{self.edit_location         .text()}"
+$Country          = "{self.combo_country         .currentData()}"
+$Algorithm        = "{self.combo_algorithm       .currentText()}"
+$KeySize          = { self.combo_key_size.currentText()}
+
+$NotBefore        = Get-Date "{self.date_not_before.date().toString("yyyy-MM-dd")}"
+$NotAfter         = Get-Date "{self.date_not_after .date().toString("yyyy-MM-dd")}"
+
+$StoreScope       = "{self.store_scope}"
+$StoreName        = "{self.store_name}"
+$CertStore        = "Cert:\\$StoreScope\\$StoreName"
+
+$Subject = "CN=$CommonName,O=$Organisation,OU=$OrganisationUnit,L=$Location,C=$Country"
+
+if ([string]::IsNullOrWhiteSpace($CommonName)) {{
+    throw "Common Name darf nicht leer sein."
+}}
+
+if ($NotBefore -ge $NotAfter) {{
+    throw "Not Before muss kleiner als Not After sein."
+}}
+
+$existing = Get-ChildItem $CertStore | Where-Object {{
+    $_.Subject -like "*CN=$CommonName*"
+}}
+
+if ($existing) {{
+    throw "Ein Zertifikat mit diesem Common Name existiert bereits im Store: $CertStore"
+}}
+
+$cert = New-SelfSignedCertificate `
+    -Type Custom `
+    -Subject $Subject `
+    -KeyAlgorithm $Algorithm `
+    -KeyLength $KeySize `
+    -KeyExportPolicy Exportable `
+    -KeyUsage CertSign, CRLSign, DigitalSignature `
+    -NotBefore $NotBefore `
+    -NotAfter $NotAfter `
+    -CertStoreLocation $CertStore `
+    -TextExtension @(
+        "2.5.29.19={{critical}}{{text}}CA=true",
+        "2.5.29.15={{critical}}{{text}}keyCertSign,cRLSign,digitalSignature"
+    )
+
+Write-Host "CA-Zertifikat wurde erstellt:"
+Write-Host "Subject:    $($cert.Subject)"
+Write-Host "Thumbprint: $($cert.Thumbprint)"
+Write-Host "Store:      $CertStore"
+"""
+        dlg = PowerShellOutputDialog(pwsh_script, self)
+        dlg.exec_()
 
 class ClientCertsWindow(QWidget):
     def __init__(self, parent=None):

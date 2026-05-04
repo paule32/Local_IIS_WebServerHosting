@@ -7,10 +7,10 @@
         "name": "New Project"
     },
     "client_authority": {
-        "common_name": "yyyyy111112222xxxxx333",
-        "organisation": "",
-        "organisation_unit": "",
-        "location": "",
+        "common_name": "Meine Test CA",
+        "organisation": "My Company Big Fail",
+        "organisation_unit": "IT",
+        "location": "Erfurt",
         "country": "DE",
         "algorithm": "RSA",
         "key_size": "4096",
