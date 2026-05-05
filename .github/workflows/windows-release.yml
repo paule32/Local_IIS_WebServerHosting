@@ -48,7 +48,7 @@ jobs:
             --clean `
             --windowed `
             --name "IIS-Setup" `
-            --add-data "resources_rc.py;." `
+            --add-data "src/resources_rc.py;." `
             src/setup.py
 
       - name: Package ZIP
