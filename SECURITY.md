@@ -1,16 +1,16 @@
-# Security Policy
+# Sicherheits-Police
 
-## Supported Versions
+## Unterstützte Versionen
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Der main Branch von diesen Projekt unterstützt zur Zeit:
+- Microsoft Windows 10/11 64-Bit Pro
+- Microsoft IIS - Internet Information Server
+- Python 3.14
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Python Version | Unterstützt        |
+| -------------- | ------------------ |
+| 13.14          | :white_check_mark: |
+| < 13           | :x:                |
 
 ## Reporting a Vulnerability
 
