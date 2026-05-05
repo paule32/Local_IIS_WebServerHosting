@@ -9,6 +9,8 @@ import sys
 import json
 import os
 import subprocess
+import tempfile
+import base64
 
 import ctypes
 from   ctypes import wintypes
@@ -27,7 +29,8 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QAction, QFileDialog, QRadioButton,
     QMessageBox, QDockWidget, QToolBar, QTextEdit, QComboBox, QHBoxLayout,
     QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox, QDialog,
-    QScrollArea, QSizePolicy, QPlainTextEdit
+    QScrollArea, QSizePolicy, QPlainTextEdit, QSplitter, QTabWidget, QTreeWidget,
+    QTreeWidgetItem,
 )
 
 # -----------------------------------------------------------------------
@@ -79,7 +82,6 @@ def get_windows_countries():
 
 class PowerShellWorker(QThread):
     output = pyqtSignal(str)
-    error = pyqtSignal(str)
     finished_ok = pyqtSignal()
     finished_error = pyqtSignal(int)
 
@@ -90,23 +92,35 @@ class PowerShellWorker(QThread):
 
     def run(self):
         try:
+            script = (
+                "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n"
+                "$OutputEncoding = [System.Text.Encoding]::UTF8\n"
+                + self.ps_script
+            )
+
+            encoded = base64.b64encode(
+                script.encode("utf-16le")
+            ).decode("ascii")
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".ps1", mode="w", encoding="utf-8") as f:
+                f.write(self.ps_script)
+                script_path = f.name
+            
             self.process = subprocess.Popen(
-                [
-                    "powershell",
+                [   "powershell",
                     "-NoProfile",
-                    "-ExecutionPolicy", "Bypass",
-                    "-Command", self.ps_script
+                    "-ExecutionPolicy", "RemoteSigned",
+                    "-File", script_path
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                encoding="utf-8",
+                errors="replace"
             )
 
             for line in self.process.stdout:
                 self.output.emit(line.rstrip())
-
-            for line in self.process.stderr:
-                self.error.emit(line.rstrip())
 
             return_code = self.process.wait()
 
@@ -116,7 +130,7 @@ class PowerShellWorker(QThread):
                 self.finished_error.emit(return_code)
 
         except Exception as e:
-            self.error.emit(str(e))
+            self.output.emit("[ERROR] " + str(e))
             self.finished_error.emit(-1)
 
     def stop(self):
@@ -146,7 +160,7 @@ class PowerShellOutputDialog(QDialog):
 
         self.worker = PowerShellWorker(ps_script, self)
         self.worker.output.connect(self.append_stdout)
-        self.worker.error.connect(self.append_stderr)
+        #self.worker.error.connect(self.append_stderr)
         self.worker.finished_ok.connect(self.on_finished_ok)
         self.worker.finished_error.connect(self.on_finished_error)
 
@@ -265,21 +279,280 @@ class ProjectButton(QPushButton):
         )
 
 
-# country_code = self.combo_country.currentData()
-class CaAuthorityWindow(QWidget):
-    def __init__(self, main_window, project_data, parent=None):
+class CertificateStoreTabs(QWidget):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.main_window = main_window
-        self.project_data = project_data
+        layout = QVBoxLayout(self)
+
+        self.tabs = QTabWidget()
+        layout.addWidget(self.tabs)
+
+        self.create_store_tab("Root Store", "Root")
+        self.create_store_tab("CA Store", "CA")
+        self.create_store_tab("Personal", "My")
+
+    def create_store_tab(self, title, store_name):
+        tab = QWidget()
+        tab.setMinimumWidth(360)
+
+        tab_layout = QVBoxLayout(tab)
+
+        splitter = QSplitter(Qt.Vertical)
+
+        current_user_widget = self.create_cert_tree_panel("CurrentUser", store_name)
+        local_machine_widget = self.create_cert_tree_panel("LocalMachine", store_name)
+
+        splitter.addWidget(current_user_widget)
+        splitter.addWidget(local_machine_widget)
+        splitter.setSizes([300, 300])
+
+        tab_layout.addWidget(splitter)
+
+        self.tabs.addTab(tab, title)
+
+    def create_cert_tree_panel(self, scope, store_name):
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+
+        layout.addWidget(QLabel(scope))
+
+        tree = QTreeWidget()
+        tree.setHeaderLabels(["Certificate", "Thumbprint", "Not After"])
+        layout.addWidget(tree)
+
+        button_layout = QHBoxLayout()
+
+        btn_show = QPushButton("Show")
+        btn_delete = QPushButton("Delete")
+
+        button_layout.addWidget(btn_show)
+        button_layout.addWidget(btn_delete)
+
+        layout.addLayout(button_layout)
+
+        btn_show  .clicked.connect(lambda: self.show_selected_certificate(tree))
+        btn_delete.clicked.connect(lambda: self.delete_selected_certificate(tree, scope, store_name))
+
+        self.load_certificates(tree, scope, store_name)
         
-        self.setFont(QFont("Arial", 10))
-        self.setProperty("changed", False)
+        return widget
+    
+    def show_selected_certificate(self, tree):
+        item = tree.currentItem()
 
+        if not item:
+            QMessageBox.information(self, "Certificate", "Kein Zertifikat ausgewählt.")
+            return
+
+        cert = item.data(0, Qt.UserRole)
+
+        if not cert:
+            QMessageBox.warning(self, "Certificate", "Keine Zertifikatsdaten vorhanden.")
+            return
+
+        text = ""
+
+        for key, value in cert.items():
+            text += f"{key}: {value}\n"
+
+        QMessageBox.information(self, "Certificate Properties", text)
+    
+    def delete_selected_certificate(self, tree, scope, store_name):
+        item = tree.currentItem()
+
+        if not item:
+            QMessageBox.information(self, "Certificate", "Kein Zertifikat ausgewählt.")
+            return
+
+        cert = item.data(0, Qt.UserRole)
+
+        if not cert:
+            QMessageBox.warning(self, "Certificate", "Keine Zertifikatsdaten vorhanden.")
+            return
+
+        thumbprint = cert.get("Thumbprint", "")
+
+        if not thumbprint:
+            QMessageBox.warning(self, "Certificate", "Thumbprint fehlt.")
+            return
+
+        result = QMessageBox.warning(
+            self,
+            "Zertifikat löschen",
+            f"Soll dieses Zertifikat wirklich gelöscht werden?\n\n"
+            f"{cert.get('Subject', '')}\n\n"
+            f"Thumbprint:\n{thumbprint}",
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            QMessageBox.Cancel
+        )
+
+        if result != QMessageBox.Yes:
+            return
+
+        ps_script = f"""
+$ErrorActionPreference = "Stop"
+
+$thumbprint = "{thumbprint}"
+$path = "Cert:\\{scope}\\{store_name}\\$thumbprint"
+
+if (-not (Test-Path $path)) {{
+    throw "Zertifikat wurde nicht gefunden: $path"
+}}
+
+Remove-Item -Path $path -Force
+Write-Host "Zertifikat gelöscht: $thumbprint"
+"""
+
+        run = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+
+        if run.returncode != 0:
+            QMessageBox.critical(self, "Delete Certificate", run.stderr)
+            return
+
+        QMessageBox.information(self, "Delete Certificate", "Zertifikat wurde gelöscht.")
+
+        self.load_certificates(tree, scope, store_name)
+    
+    def load_certificates(self, tree, scope, store_name):
+        certs = self.get_certificates(scope, store_name)
+
+        tree.clear()
+
+        if not certs:
+            return
+
+        by_subject = {}
+
+        for cert in certs:
+            subject = cert.get("Subject", "")
+            issuer = cert.get("Issuer", "")
+
+            item = QTreeWidgetItem()
+            item.setText(0, self.extract_cn(subject))
+            item.setText(1, cert.get("Thumbprint", ""))
+            item.setText(2, cert.get("NotAfter", ""))
+
+            item.setData(0, Qt.UserRole, cert)
+            by_subject[subject] = item
+
+        added = set()
+
+        for cert in certs:
+            subject = cert.get("Subject", "")
+            issuer = cert.get("Issuer", "")
+
+            item = by_subject.get(subject)
+
+            if not item:
+                continue
+
+            if issuer != subject and issuer in by_subject:
+                parent_item = by_subject[issuer]
+                parent_item.addChild(item)
+                added.add(subject)
+            else:
+                tree.addTopLevelItem(item)
+                added.add(subject)
+
+        for cert in certs:
+            subject = cert.get("Subject", "")
+
+            if subject not in added:
+                item = by_subject.get(subject)
+                if item:
+                    tree.addTopLevelItem(item)
+
+        tree.expandAll()
+        tree.resizeColumnToContents(0)
+
+    def get_certificates(self, scope, store_name):
+        ps_script = f"""
+$ErrorActionPreference = "Stop"
+
+$certs = Get-ChildItem Cert:\\{scope}\\{store_name} | ForEach-Object {{
+    [PSCustomObject]@{{
+        Subject    = $_.Subject
+        Issuer     = $_.Issuer
+        Thumbprint = $_.Thumbprint
+        NotBefore  = $_.NotBefore.ToString("yyyy-MM-dd")
+        NotAfter   = $_.NotAfter.ToString("yyyy-MM-dd")
+    }}
+}}
+
+$certs | ConvertTo-Json -Depth 5
+"""
+
+        try:
+            result = subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-ExecutionPolicy", "RemoteSigned",
+                    "-Command", ps_script
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace"
+            )
+
+            if result.returncode != 0:
+                QMessageBox.warning(
+                    self,
+                    "Certificate Store",
+                    result.stderr
+                )
+                return []
+
+            text = result.stdout.strip()
+
+            if not text:
+                return []
+
+            data = json.loads(text)
+
+            if isinstance(data, dict):
+                data = [data]
+
+            return data
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Certificate Store",
+                str(e)
+            )
+            return []
+
+    def extract_cn(self, subject):
+        parts = subject.split(",")
+
+        for part in parts:
+            part = part.strip()
+            if part.startswith("CN="):
+                return part[3:]
+
+        return subject
+        
+
+class RightCAWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+
+        self.main_window  = parent.owner.main_window
+        self.project_data = parent.owner.project_data
+        
         main_layout = QVBoxLayout(self)
-
         form_layout = QFormLayout()
-
+        
         self.edit_common_name       = QLineEdit()
         self.edit_organisation      = QLineEdit()
         self.edit_organisation_unit = QLineEdit()
@@ -645,9 +918,9 @@ $CommonName       = "{self.edit_common_name      .text()}"
 $Organisation     = "{self.edit_organisation     .text()}"
 $OrganisationUnit = "{self.edit_organisation_unit.text()}"
 $Location         = "{self.edit_location         .text()}"
-$Country          = "{self.combo_country         .currentData()}"
-$Algorithm        = "{self.combo_algorithm       .currentText()}"
-$KeySize          = { self.combo_key_size.currentText()}
+$Country          = "{self.combo_country  .currentData()}"
+$Algorithm        = "{self.combo_algorithm.currentText()}"
+$KeySize          =  {self.combo_key_size .currentText()}
 
 $NotBefore        = Get-Date "{self.date_not_before.date().toString("yyyy-MM-dd")}"
 $NotAfter         = Get-Date "{self.date_not_after .date().toString("yyyy-MM-dd")}"
@@ -658,12 +931,31 @@ $CertStore        = "Cert:\\$StoreScope\\$StoreName"
 
 $Subject = "CN=$CommonName,O=$Organisation,OU=$OrganisationUnit,L=$Location,C=$Country"
 
+Write-Host "CommonName       = $CommonName"
+Write-Host "Organisation     = $Organisation"
+Write-Host "OrganisationUnit = $OrganisationUnit"
+Write-Host "Location         = $Location"
+Write-Host "Country          = $Country"
+Write-Host "Algorithm        = $Algorithm"
+Write-Host "KeySize          = $KeySize"
+Write-Host ""
+Write-Host "NotBefore        = $NotBefore"
+Write-Host "NotAfter         = $NotAfter"
+
+Write-Host ""
+Write-Host "StoreScope       = $StoreScope"
+Write-Host "StoreName        = $StoreName"
+Write-Host "CertStore        = $CertStore"
+Write-Host ""
+Write-Host "Subject          = $Subject"
+Write-Host ""
+
 if ([string]::IsNullOrWhiteSpace($CommonName)) {{
-    throw "Common Name darf nicht leer sein."
+    throw "Common Name must be filled."
 }}
 
 if ($NotBefore -ge $NotAfter) {{
-    throw "Not Before muss kleiner als Not After sein."
+    throw "Not Before must be lesser as Not After."
 }}
 
 $existing = Get-ChildItem $CertStore | Where-Object {{
@@ -671,31 +963,69 @@ $existing = Get-ChildItem $CertStore | Where-Object {{
 }}
 
 if ($existing) {{
-    throw "Ein Zertifikat mit diesem Common Name existiert bereits im Store: $CertStore"
+    throw "Certificate with Common Name already exists im Store: $CertStore"
 }}
 
-$cert = New-SelfSignedCertificate `
-    -Type Custom `
-    -Subject $Subject `
-    -KeyAlgorithm $Algorithm `
-    -KeyLength $KeySize `
-    -KeyExportPolicy Exportable `
-    -KeyUsage CertSign, CRLSign, DigitalSignature `
-    -NotBefore $NotBefore `
-    -NotAfter $NotAfter `
-    -CertStoreLocation $CertStore `
-    -TextExtension @(
-        "2.5.29.19={{critical}}{{text}}CA=true",
-        "2.5.29.15={{critical}}{{text}}keyCertSign,cRLSign,digitalSignature"
-    )
+try {{
+    $cert = New-SelfSignedCertificate `
+        -Type Custom `
+        -Subject $Subject `
+        -KeyAlgorithm $Algorithm `
+        -KeyLength $KeySize `
+        -KeyExportPolicy Exportable `
+        -KeyUsage CertSign, CRLSign, DigitalSignature `
+        -NotBefore $NotBefore `
+        -NotAfter $NotAfter `
+        -CertStoreLocation $CertStore `
+        -TextExtension @(
+            "2.5.29.19={{critical}}{{text}}CA=true"
+        ) `
+        -ErrorAction Stop
 
-Write-Host "CA-Zertifikat wurde erstellt:"
-Write-Host "Subject:    $($cert.Subject)"
-Write-Host "Thumbprint: $($cert.Thumbprint)"
-Write-Host "Store:      $CertStore"
+    if ($null -eq $cert) {{
+        throw "New-SelfSignedCertificate return no Certificate Object."
+    }}
+
+    Write-Host "CA-Certificate successfully created."
+    Write-Host "Thumbprint: $($cert.Thumbprint)"
+    Write-Host "Store:      $CertStore"
+}}
+catch {{
+    Write-Host "FEHLER:"
+    Write-Host $_.Exception.Message
+    exit 1
+}}
 """
         dlg = PowerShellOutputDialog(pwsh_script, self)
         dlg.exec_()
+
+
+# country_code = self.combo_country.currentData()
+class CaAuthorityWindow(QWidget):
+    def __init__(self, main_window, project_data, parent=None):
+        super().__init__(parent)
+
+        self.owner        = self
+        self.main_window  = main_window
+        self.project_data = project_data
+        
+        self.setFont(QFont("Arial", 10))
+        self.setProperty("changed", False)
+
+        main_layout  = QVBoxLayout(self)
+        
+        splitter     = QSplitter(Qt.Horizontal)
+
+        left_widget  = CertificateStoreTabs(self)
+        right_widget = RightCAWidget(self)
+
+        splitter.addWidget(left_widget)
+        splitter.addWidget(right_widget)
+
+        splitter.setSizes([180, 520])
+
+        main_layout.addWidget(splitter)
+        
 
 class ClientCertsWindow(QWidget):
     def __init__(self, parent=None):
@@ -813,28 +1143,28 @@ class MainWindow(QMainWindow):
         menu_font = QFont("Arial", 10)
         menu_font.setBold(True)
         self.menuBar().setFont(menu_font)
-        self.menuBar().setStyleSheet("""
-QMenuBar {
+        self.menuBar().setStyleSheet(f"""
+QMenuBar {{
     color: #ffd866;
     font-family: Arial;
     font-size: 10pt;
     font-weight: bold;
-}
-QMenuBar::item {
+}}
+QMenuBar::item {{
     color: #ffd866;
-}
-QMenuBar::item:selected {
+}}
+QMenuBar::item:selected {{
     background-color: #5a1020;
-}
-QMenu {
+}}
+QMenu {{
     color: #ffd866;
     font-family: Arial;
     font-size: 10pt;
     font-weight: bold;
-}
-QMenu::item:selected {
+}}
+QMenu::item:selected {{
     background-color: #5a1020;
-}
+}}
 """)
         
         menu_new = menu_file.addMenu("New")
@@ -1238,4 +1568,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except RuntimeError as e:
+        print(e)
+    except Exception as e:
+        print(e)
+        

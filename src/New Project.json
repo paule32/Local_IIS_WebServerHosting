@@ -14,11 +14,11 @@
         "country": "DE",
         "algorithm": "RSA",
         "key_size": "4096",
-        "not_before": "2026-05-04",
+        "not_before": "2026-05-02",
         "not_after": "2036-05-04",
         "basic_constraints": true,
         "usage": "trusted_ca",
-        "store": "ca_store",
+        "store": "personal",
         "scope": "current_user"
     },
     "client_certs": []
