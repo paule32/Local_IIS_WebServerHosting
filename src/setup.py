@@ -80,6 +80,25 @@ def get_windows_countries():
     return sorted(result.items())
 
 
+def is_user_admin():
+    try:
+        return bool(ctypes.windll.shell32.IsUserAnAdmin())
+    except Exception:
+        return False
+
+def restart_as_admin():
+    params = " ".join([f'"{arg}"' for arg in sys.argv])
+    ctypes.windll.shell32.ShellExecuteW(
+        None,
+        "runas",
+        sys.executable,
+        params,
+        None,
+        1
+    )
+    sys.exit(0)
+
+
 class PowerShellWorker(QThread):
     output = pyqtSignal(str)
     finished_ok = pyqtSignal()
@@ -194,6 +213,265 @@ class PowerShellOutputDialog(QDialog):
             self.worker.wait(2000)
 
         super().closeEvent(event)
+
+
+class CertificateSyncDialog(QDialog):
+    def __init__(self, main_window, parent=None):
+        super().__init__(parent)
+
+        self.main_window = main_window
+        self.setWindowTitle("Certificate Store Synchronizing")
+        self.resize(920, 560)
+
+        layout = QVBoxLayout(self)
+
+        self.info_label   = QLabel("Compare Windows certificate stores with the project JSON snapshot.")
+        self.info_changes = False
+        
+        layout.addWidget(self.info_label)
+
+        self.tree = QTreeWidget()
+        self.tree.setHeaderLabels(["State", "Scope", "Store", "Certificate", "Thumbprint", "Not After"])
+        layout.addWidget(self.tree)
+
+        button_layout = QHBoxLayout()
+
+        self.btn_refresh  = QPushButton("Refresh Diff")
+        self.btn_snapshot = QPushButton("Store Snapshot to JSON")
+        
+        self.btn_apply    = QPushButton("Apply")
+        self.btn_cancel   = QPushButton("Cancel")
+
+        button_layout.addWidget(self.btn_refresh)
+        button_layout.addWidget(self.btn_snapshot)
+        button_layout.addStretch()
+        button_layout.addWidget(self.btn_apply)
+        button_layout.addWidget(self.btn_cancel)
+
+        layout.addLayout(button_layout)
+
+        self.btn_refresh .clicked.connect(self.refresh_diff)
+        self.btn_snapshot.clicked.connect(self.store_snapshot_to_json)
+        self.btn_apply   .clicked.connect(self.on_apply_clicked)
+        self.btn_cancel  .clicked.connect(self.on_cancel_clicked)
+
+        self.store_certs = []
+        self.refresh_diff()
+
+    def on_apply_clicked(self):
+        self.has_changes = True
+        self.store_snapshot_to_json()
+
+        sub = self.parentWidget()
+        while sub is not None and not isinstance(sub, QMdiSubWindow):
+            sub = sub.parentWidget()
+
+        if sub is not None:
+            self.accept()
+            sub .close()
+            return
+
+        self.close()
+
+    def on_cancel_clicked(self):
+        self.has_changes = False
+
+        sub = self.parentWidget()
+        while sub is not None and not isinstance(sub, QMdiSubWindow):
+            sub = sub.parentWidget()
+
+        if sub is not None:
+            sub.close()
+            return
+
+        self.close()
+    
+    def refresh_diff(self):
+        self.store_certs = self.read_windows_certificate_stores()
+        json_certs = self.main_window.current_project_data.get("certificate_snapshot", [])
+
+        self.tree.clear()
+
+        store_map = self.make_cert_map(self.store_certs)
+        json_map  = self.make_cert_map(json_certs)
+
+        all_keys = sorted(set(store_map.keys()) | set(json_map.keys()))
+
+        for key in all_keys:
+            store_cert = store_map.get(key)
+            json_cert  = json_map.get(key)
+
+            if store_cert and json_cert:
+                if self.cert_metadata_equal(store_cert, json_cert):
+                    state = "OK"
+                else:
+                    state = "CHANGED"
+                cert = store_cert
+            elif store_cert:
+                state = "STORE ONLY"
+                cert = store_cert
+            else:
+                state = "JSON ONLY"
+                cert = json_cert
+
+            item = QTreeWidgetItem()
+            item.setText(0, state)
+            item.setText(1, cert.get("Scope", ""))
+            item.setText(2, cert.get("Store", ""))
+            item.setText(3, self.extract_cn(cert.get("Subject", "")))
+            item.setText(4, cert.get("Thumbprint", ""))
+            item.setText(5, cert.get("NotAfter", ""))
+            item.setData(0, Qt.UserRole, cert)
+
+            self.tree.addTopLevelItem(item)
+
+        for column in range(self.tree.columnCount()):
+            self.tree.resizeColumnToContents(column)
+
+        self.info_label.setText(
+            f"Store: {len(self.store_certs)} certificate(s), "
+            f"JSON: {len(json_certs)} certificate(s), "
+            f"Diff: {len(all_keys)} row(s)"
+        )
+
+    def store_snapshot_to_json(self):
+        if not self.main_window.current_project_data:
+            QMessageBox.warning(self, "Certificate Sync", "No active project available.")
+            return
+
+        self.main_window.current_project_data["certificate_snapshot"] = self.store_certs
+
+        if hasattr(self.main_window, "set_project_dirty"):
+            self.main_window.set_project_dirty(True)
+
+        result = QMessageBox.question(
+            self,
+            "Certificate Sync",
+            "Certificate snapshot was copied to project data.\n\nSave project file now?",
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            QMessageBox.Yes
+        )
+
+        if result == QMessageBox.Cancel:
+            return
+
+        if result == QMessageBox.Yes:
+            self.main_window.on_save()
+
+        self.refresh_diff()
+
+    def read_windows_certificate_stores(self):
+        ps_script = """
+$ErrorActionPreference = "Continue"
+$items = @()
+$scopes = @("CurrentUser", "LocalMachine")
+$stores = @("Root", "CA", "My")
+
+foreach ($scope in $scopes) {
+    foreach ($store in $stores) {
+        $path = "Cert:\\$scope\\$store"
+
+        try {
+            Get-ChildItem $path | ForEach-Object {
+                $items += [PSCustomObject]@{
+                    Scope      = $scope
+                    Store      = $store
+                    Subject    = $_.Subject
+                    Issuer     = $_.Issuer
+                    Thumbprint = $_.Thumbprint
+                    NotBefore  = $_.NotBefore.ToString("yyyy-MM-dd")
+                    NotAfter   = $_.NotAfter.ToString("yyyy-MM-dd")
+                    HasPrivateKey = $_.HasPrivateKey
+                }
+            }
+        }
+        catch {
+            # Store could not be read. This is intentionally ignored here.
+        }
+    }
+}
+
+$items | ConvertTo-Json -Depth 5
+"""
+
+        try:
+            result = subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-ExecutionPolicy", "RemoteSigned",
+                    "-Command", ps_script
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace"
+            )
+
+            if result.returncode != 0:
+                QMessageBox.warning(self, "Certificate Sync", result.stderr)
+                return []
+
+            text = result.stdout.strip()
+
+            if not text:
+                return []
+
+            data = json.loads(text)
+
+            if isinstance(data, dict):
+                data = [data]
+
+            return data
+
+        except Exception as e:
+            QMessageBox.critical(self, "Certificate Sync", str(e))
+            return []
+
+    def make_cert_map(self, certs):
+        result = {}
+
+        for cert in certs:
+            thumbprint = cert.get("Thumbprint", "")
+            scope = cert.get("Scope", "")
+            store = cert.get("Store", "")
+
+            if not thumbprint:
+                continue
+
+            key = (
+                scope.lower(),
+                store.lower(),
+                thumbprint.upper()
+            )
+            result[key] = cert
+
+        return result
+
+    def cert_metadata_equal(self, left, right):
+        fields = [
+            "Subject",
+            "Issuer",
+            "NotBefore",
+            "NotAfter",
+            "HasPrivateKey"
+        ]
+
+        for field in fields:
+            if str(left.get(field, "")) != str(right.get(field, "")):
+                return False
+
+        return True
+
+    def extract_cn(self, subject):
+        parts = subject.split(",")
+
+        for part in parts:
+            part = part.strip()
+            if part.startswith("CN="):
+                return part[3:]
+
+        return subject
 
 
 class ProjectMdiSubWindow(QMdiSubWindow):
@@ -940,11 +1218,33 @@ class RightCAWidget(QWidget):
             self.store_scope = "CurrentUser"
         else:
             self.store_scope = "LocalMachine"
+            result = QMessageBox.question(
+                self,
+                "Admin Rights requiered",
+                "For LocalMachine, you need administrative rights.\n\n"
+                "Do you want restart the Application as admin?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes
+            )
+            if result == QMessageBox.Yes:
+                restart_as_admin()
+            else:
+                return
         
         if self.radio_root.isChecked():
             self.store_name = "Root"
+            if not is_user_admin():
+                QMessageBox.warning(self,
+                "ACL Error",
+                "You have no permissions to create a Root CA")
+                return
         elif self.radio_ca_store.isChecked():
             self.store_name = "CA"
+            if not is_user_admin():
+                QMessageBox.warning(self,
+                "ACL Error",
+                "You have no permissions to create a CA")
+                return
         else:
             self.store_name = "My"
         
@@ -1063,15 +1363,65 @@ class CaAuthorityWindow(QWidget):
         
         splitter     = QSplitter(Qt.Horizontal)
 
-        left_widget  = CertificateStoreTabs(self)
-        right_widget = RightCAWidget(self)
+        self.left_widget  = CertificateStoreTabs(self)
+        self.right_widget = RightCAWidget(self)
 
-        splitter.addWidget(left_widget)
-        splitter.addWidget(right_widget)
+        splitter.addWidget(self.left_widget)
+        splitter.addWidget(self.right_widget)
 
         splitter.setSizes([180, 520])
 
         main_layout.addWidget(splitter)
+
+    def setup_change_tracking(self):
+        if hasattr(self, "right_widget"):
+            self.right_widget.setup_change_tracking()
+
+    def mark_changed(self, *args):
+        self.set_changed(True)
+
+    def set_changed(self, state):
+        self.setProperty("changed", bool(state))
+        if hasattr(self, "right_widget"):
+            self.right_widget.set_changed(state)
+
+    def is_changed(self):
+        if bool(self.property("changed")):
+            return True
+        if hasattr(self, "right_widget"):
+            return self.right_widget.is_changed()
+        return False
+
+    def save_to_project(self):
+        if hasattr(self, "right_widget"):
+            self.right_widget.save_to_project()
+            self.right_widget.set_changed(False)
+        self.set_changed(False)
+
+    def request_close(self):
+        if not self.is_changed():
+            return True
+
+        result = QMessageBox.question(
+            self,
+            "Save Changes",
+            "There are unsaved changes. Do you want to save them before closing?",
+            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            QMessageBox.Cancel
+        )
+
+        if result == QMessageBox.Yes:
+            self.save_to_project()
+            self.main_window.save_project_file(
+                self.main_window.current_project_file,
+                self.main_window.current_project_data
+            )
+            return True
+
+        if result == QMessageBox.No:
+            return True
+
+        return False
         
 
 class ClientCertsWindow(QWidget):
@@ -1095,6 +1445,7 @@ class MainWindow(QMainWindow):
         self.current_project_file = None
         self.current_project_data = None
         self.current_ca_window = None
+        self.project_dirty = False
         
         self.mdi = QMdiArea()
         self.mdi.setFont(QFont("Arial", 10))
@@ -1108,6 +1459,7 @@ class MainWindow(QMainWindow):
         self.create_menus()
         self.create_toolbar()
         self.create_statusbar()
+        self.update_project_actions()
 
         self.mdi.subWindowActivated.connect(self.update_window_menu)
 
@@ -1161,12 +1513,19 @@ class MainWindow(QMainWindow):
 
         self.act_client_certs = QAction("Client Certs", self)
         self.act_client_certs.triggered.connect(self.on_client_certs)
+        
+        self.act_sync_certs = QAction("Synchronize Certificates ...", self)
+        self.act_sync_certs.triggered.connect(self.on_sync_certificates)
 
         self.act_open = QAction("Open", self)
         self.act_open.triggered.connect(self.on_open_project)
 
         self.act_save = QAction("Save", self)
         self.act_save.triggered.connect(self.on_save)
+        
+        self.act_save_as = QAction("Save As ...", self)
+        self.act_save_as.setEnabled(False)
+        self.act_save_as.triggered.connect(self.on_save_as)
 
         self.act_exit = QAction("Exit", self)
         self.act_exit.triggered.connect(self.close)
@@ -1219,10 +1578,12 @@ QMenu::item:selected {{
         menu_new.addSeparator()
         menu_new.addAction(self.act_ca_authority)
         menu_new.addAction(self.act_client_certs)
-        
+        menu_new.addSeparator()
+        menu_new.addAction(self.act_sync_certs)
         
         menu_file.addAction(self.act_open)
         menu_file.addAction(self.act_save)
+        menu_file.addAction(self.act_save_as)
 
         menu_file.addSeparator()
         menu_file.addAction(self.act_exit)
@@ -1385,9 +1746,46 @@ QMenu::item:selected {{
         self.current_project_data = project_data
 
         self.add_project_button(filename, project_data)
+        self.set_project_dirty(False)
+        self.update_project_actions()
 
         self.statusBar().showMessage(f"Project opened: {filename}")
 
+    def update_project_actions(self):
+        has_project = bool(self.current_project_file and self.current_project_data)
+        if hasattr(self, "act_save_as"):
+            self.act_save_as.setEnabled(has_project)
+
+    def set_project_dirty(self, dirty=True):
+        self.project_dirty = bool(dirty)
+        if self.current_project_data is not None:
+            self.current_project_data.setdefault("state", {})["dirty"] = self.project_dirty
+
+    def clear_dirty_flags(self):
+        for sub in self.mdi.subWindowList():
+            widget = sub.widget()
+            if widget is None:
+                continue
+            widget.setProperty("dirty", False)
+            for child in widget.findChildren(QWidget):
+                child.setProperty("dirty", False)
+
+    def has_dirty_components(self):
+        if self.project_dirty:
+            return True
+
+        for sub in self.mdi.subWindowList():
+            widget = sub.widget()
+            if widget is None:
+                continue
+            if widget.property("dirty"):
+                return True
+            for child in widget.findChildren(QWidget):
+                if child.property("dirty"):
+                    return True
+
+        return False
+        
     def on_save(self):
         if not self.current_project_file or not self.current_project_data:
             QMessageBox.information(self,
@@ -1404,6 +1802,10 @@ QMenu::item:selected {{
                 self.current_project_data
             )
 
+            self.set_project_dirty(False)
+            self.clear_dirty_flags()
+            self.update_project_actions()
+
             self.statusBar().showMessage(
                 f"Project saved: {self.current_project_file}"
             )
@@ -1414,6 +1816,55 @@ QMenu::item:selected {{
                 "Fehler",
                 f"Could not save Project:\n\n{e}"
             )
+
+    def on_save_as(self):
+        if not self.current_project_file or not self.current_project_data:
+            QMessageBox.information(self,
+            "Save As ...",
+            "No active Project available.")
+            return
+
+        if self.current_ca_window is not None:
+            self.current_ca_window.save_to_project()
+
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Project File...",
+            self.current_project_file,
+            "JSON Project Files (*.json);;All Files (*.*)"
+        )
+
+        if not filename:
+            return
+
+        if not filename.lower().endswith(".json"):
+            filename += ".json"
+
+        try:
+            self.save_project_file(filename, self.current_project_data)
+            self.current_project_file = filename
+            self.set_project_dirty(False)
+            self.clear_dirty_flags()
+            self.update_project_actions()
+            self.statusBar().showMessage(f"Project saved under:: {filename}")
+
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Fehler",
+                f"Project could not be saved:\n\n{e}"
+            )
+
+    def on_sync_certificates(self):
+        if not self.current_project_file or not self.current_project_data:
+            QMessageBox.information(self,
+            "Certificate Sync",
+            "No active Project available.")
+            return
+        
+        widget = CertificateSyncDialog(self, self)
+        self.add_mdi_widget(widget, "Client Certs", 700, 400)
+        self.statusBar().showMessage("Client Certs geöffnet")
 
     def on_help_contents(self):
         if not os.path.exists(HELP_FILE):
@@ -1484,6 +1935,8 @@ QMenu::item:selected {{
         self.current_project_data = project_data
 
         self.add_project_button(filename, project_data)
+        self.set_project_dirty(False)
+        self.update_project_actions()
 
         self.statusBar().showMessage(f"Project successfully created: {filename}")
 
@@ -1514,8 +1967,79 @@ QMenu::item:selected {{
             self.current_project_file,
             self.current_project_data
         )
-        
+    
+    def check_certificate_snapshot_before_open(self, project_data):
+        snapshots = project_data.get("certificate_snapshots", [])
+
+        if not snapshots:
+            return True
+
+        missing = []
+
+        for cert in snapshots:
+            scope = cert.get("scope", "")
+            store = cert.get("store", "")
+            thumbprint = cert.get("thumbprint", "")
+
+            if not scope or not store or not thumbprint:
+                missing.append(cert)
+                continue
+
+            if not self.certificate_exists(scope, store, thumbprint):
+                missing.append(cert)
+
+        if not missing:
+            return True
+
+        dlg = CertificateSyncDialog(project_data, self)
+        result = dlg.exec_()
+
+        if result != QDialog.Accepted:
+            return False
+
+        if getattr(dlg, "has_changes", False):
+            self.save_project_file(
+                self.current_project_file,
+                self.current_project_data
+            )
+
+            QMessageBox.information(
+                self,
+                "Certificate Snapshot",
+                "Die Zertifikats-Snapshots wurden aktualisiert."
+            )
+
+        return True
+
+
+    def certificate_exists(self, scope, store, thumbprint):
+        ps_script = f"""
+$path = "Cert:\\{scope}\\{store}\\{thumbprint}"
+
+if (Test-Path $path) {{
+    exit 0
+}} else {{
+    exit 1
+}}
+"""
+
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+
+        return result.returncode == 0
+    
     def open_client_authority_dialog_for_project(self, project_file, project_data):
+        self.current_project_file = project_file
+        self.current_project_data = project_data
+
+        if not self.check_certificate_snapshot_before_open(project_data):
+            return
+        
         existing = self.find_project_window(project_file, "client_authority")
 
         if existing:
@@ -1573,6 +2097,8 @@ QMenu::item:selected {{
                         self.current_project_file,
                         self.current_project_data
                     )
+                    self.set_project_dirty(False)
+                    self.clear_dirty_flags()
 
                 event.accept()
                 return

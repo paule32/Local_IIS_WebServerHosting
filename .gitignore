@@ -3,3 +3,5 @@ src/setup_modified.py
 src/setup_strict_additive.py
 src/setup_additive.py
 src/setup_saveas_dirty.py
+/tmp
+src/setup_cert_sync.py

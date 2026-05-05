@@ -19,7 +19,7 @@
         "basic_constraints": true,
         "usage": "trusted_ca",
         "store": "personal",
-        "scope": "local_machine"
+        "scope": "current_user"
     },
     "client_certs": [],
     "state": {
