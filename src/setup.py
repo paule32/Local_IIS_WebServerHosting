@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (
     QMessageBox, QDockWidget, QToolBar, QTextEdit, QComboBox, QHBoxLayout,
     QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox, QDialog,
     QScrollArea, QSizePolicy, QPlainTextEdit, QSplitter, QTabWidget, QTreeWidget,
-    QTreeWidgetItem,
+    QTreeWidgetItem, QProgressDialog
 )
 
 # -----------------------------------------------------------------------
@@ -287,21 +287,59 @@ class CertificateStoreTabs(QWidget):
 
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
+        
+        progress = QProgressDialog(
+            "Searching Certificate...",
+            None,
+            0,
+            6,
+            self
+        )
+        progress.setWindowTitle("Please wait")
+        progress.setWindowModality(Qt.WindowModal)
+        progress.setCancelButton(None)
+        progress.setStyleSheet("color:yellow;")
+        progress.resize(280,74)
+        progress.show()
 
-        self.create_store_tab("Root Store", "Root")
-        self.create_store_tab("CA Store", "CA")
-        self.create_store_tab("Personal", "My")
+        step = 0
 
-    def create_store_tab(self, title, store_name):
+        self.create_store_tab("Root Store", "Root", progress, step)
+        step += 2
+
+        self.create_store_tab("CA Store", "CA", progress, step)
+        step += 2
+
+        self.create_store_tab("Personal", "My", progress, step)
+        step += 2
+
+        progress.setValue(6)
+
+        #self.create_store_tab("Root Store", "Root")
+        #self.create_store_tab("CA Store", "CA")
+        #self.create_store_tab("Personal", "My")
+
+    def create_store_tab(self, title, store_name, progress=None, step=0):
         tab = QWidget()
-        tab.setMinimumWidth(360)
+        tab.setMinimumWidth(340)
 
         tab_layout = QVBoxLayout(tab)
 
         splitter = QSplitter(Qt.Vertical)
 
-        current_user_widget = self.create_cert_tree_panel("CurrentUser", store_name)
-        local_machine_widget = self.create_cert_tree_panel("LocalMachine", store_name)
+        current_user_widget = self.create_cert_tree_panel(
+            "CurrentUser",
+            store_name,
+            progress,
+            step + 1
+        )
+
+        local_machine_widget = self.create_cert_tree_panel(
+            "LocalMachine",
+            store_name,
+            progress,
+            step + 2
+        )
 
         splitter.addWidget(current_user_widget)
         splitter.addWidget(local_machine_widget)
@@ -311,7 +349,7 @@ class CertificateStoreTabs(QWidget):
 
         self.tabs.addTab(tab, title)
 
-    def create_cert_tree_panel(self, scope, store_name):
+    def create_cert_tree_panel(self, scope, store_name, progress=None, step=0):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
@@ -323,8 +361,8 @@ class CertificateStoreTabs(QWidget):
 
         button_layout = QHBoxLayout()
 
-        btn_show = QPushButton("Show")
-        btn_delete = QPushButton("Delete")
+        btn_show      = QPushButton("Show")
+        btn_delete    = QPushButton("Delete")
 
         button_layout.addWidget(btn_show)
         button_layout.addWidget(btn_delete)
@@ -334,8 +372,17 @@ class CertificateStoreTabs(QWidget):
         btn_show  .clicked.connect(lambda: self.show_selected_certificate(tree))
         btn_delete.clicked.connect(lambda: self.delete_selected_certificate(tree, scope, store_name))
 
+        if progress:
+            progress.setLabelText(f"Load {scope}\\{store_name} ...")
+            progress.setValue(step - 1)
+            QApplication.processEvents()
+
         self.load_certificates(tree, scope, store_name)
-        
+
+        if progress:
+            progress.setValue(step)
+            QApplication.processEvents()
+
         return widget
     
     def show_selected_certificate(self, tree):
@@ -1042,7 +1089,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle(APP_NAME)
-        self.resize(800, 600)
+        self.resize(1000, 700)
         self.setFont(QFont("Arial", 10))
 
         self.current_project_file = None
@@ -1198,7 +1245,7 @@ QMenu::item:selected {{
         self.addToolBar(toolbar)
 
     def create_statusbar(self):
-        self.statusBar().showMessage("Bereit")
+        self.statusBar().showMessage("Ready")
 
     def scroll_sidebar_up(self):
         scrollbar = self.sidebar_scroll_area.verticalScrollBar()
@@ -1271,14 +1318,14 @@ QMenu::item:selected {{
         window.widget().setFocus()
 
     def on_new(self):
-        self.statusBar().showMessage("New geklickt")
+        self.statusBar().showMessage("New clicked")
 
     def on_open_project(self):
         filename, _ = QFileDialog.getOpenFileName(
             self,
-            "Projektdatei öffnen",
+            "Open Project File",
             "",
-            "JSON Projektdateien (*.json);;Alle Dateien (*.*)"
+            "JSON Project Files (*.json);;All Files (*.*)"
         )
 
         if not filename:
@@ -1294,8 +1341,8 @@ QMenu::item:selected {{
                 if os.path.abspath(widget.project_file) == normalized_filename:
                     QMessageBox.warning(
                         self,
-                        "Projekt bereits geöffnet",
-                        "Dieses Projekt ist bereits geöffnet."
+                        "Open Project",
+                        "This Project is already open."
                     )
                     return
 
@@ -1307,7 +1354,7 @@ QMenu::item:selected {{
             QMessageBox.critical(
                 self,
                 "Fehler",
-                f"Projektdatei konnte nicht geöffnet werden:\n\n{e}"
+                f"Project File could not be opened:\n\n{e}"
             )
             return
 
@@ -1339,11 +1386,13 @@ QMenu::item:selected {{
 
         self.add_project_button(filename, project_data)
 
-        self.statusBar().showMessage(f"Projekt geöffnet: {filename}")
+        self.statusBar().showMessage(f"Project opened: {filename}")
 
     def on_save(self):
         if not self.current_project_file or not self.current_project_data:
-            QMessageBox.information(self, "Save", "Kein aktives Projekt vorhanden.")
+            QMessageBox.information(self,
+            "Save",
+            "No active Project available.")
             return
 
         if self.current_ca_window is not None:
@@ -1356,14 +1405,14 @@ QMenu::item:selected {{
             )
 
             self.statusBar().showMessage(
-                f"Projekt gespeichert: {self.current_project_file}"
+                f"Project saved: {self.current_project_file}"
             )
 
         except Exception as e:
             QMessageBox.critical(
                 self,
                 "Fehler",
-                f"Projekt konnte nicht gespeichert werden:\n\n{e}"
+                f"Could not save Project:\n\n{e}"
             )
 
     def on_help_contents(self):
@@ -1371,20 +1420,22 @@ QMenu::item:selected {{
             QMessageBox.warning(
                 self,
                 "Hilfe",
-                f"Die CHM-Hilfe wurde nicht gefunden:\n\n{HELP_FILE}"
+                f"The CHM-Help could not be found:\n\n{HELP_FILE}"
             )
             return
 
         try:
             subprocess.Popen(["hh.exe", HELP_FILE])
         except Exception as e:
-            QMessageBox.critical(self, "Fehler", f"CHM-Hilfe konnte nicht geöffnet werden:\n\n{e}")
+            QMessageBox.critical(self,
+            "Error",
+            f"CHM-Help could not be open:\n\n{e}")
 
     def on_new_project(self):
         project_name, ok = QInputDialog.getText(
             self,
-            "Neues Projekt",
-            "Projektname:",
+            "New Project",
+            "Project Name:",
             text="New Project"
         )
 
@@ -1398,9 +1449,9 @@ QMenu::item:selected {{
 
         filename, _ = QFileDialog.getSaveFileName(
             self,
-            "Projektdatei erstellen",
+            "Create Project File",
             project_name + ".json",
-            "JSON Projektdateien (*.json)"
+            "JSON Project Files (*.json)"
         )
 
         if not filename:
@@ -1434,7 +1485,7 @@ QMenu::item:selected {{
 
         self.add_project_button(filename, project_data)
 
-        self.statusBar().showMessage(f"Projekt erstellt: {filename}")
+        self.statusBar().showMessage(f"Project successfully created: {filename}")
 
 
     def add_project_button(self, project_file, project_data):
@@ -1454,8 +1505,8 @@ QMenu::item:selected {{
         if not self.current_project_file or not self.current_project_data:
             QMessageBox.information(
                 self,
-                "Projekt",
-                "Bitte zuerst ein Projekt erstellen oder öffnen."
+                "Project",
+                "Firstly, you have to create a Project."
             )
             return
 
@@ -1481,8 +1532,8 @@ QMenu::item:selected {{
         sub = self.add_mdi_widget(
             widget,
             title,
-            600,
-            350
+            820,
+            580
         )
 
         sub.project_file = os.path.abspath(project_file)
@@ -1535,8 +1586,8 @@ QMenu::item:selected {{
 
         result = QMessageBox.question(
             self,
-            "Anwendung schließen",
-            "Möchten Sie die Anwendung wirklich schließen?",
+            "Close Application",
+            "Would you really close the Application?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )

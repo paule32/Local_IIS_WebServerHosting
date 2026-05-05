@@ -1,0 +1,77 @@
+# ---------------------------------------------------------------------------
+# File:   windows-release.yml
+# Author: (c) 2026 Jens Kallup - paule32
+# All rights reserved
+#
+# github.com CI workflow to create SETUP.EXE for Windows 10/11 64-Bit Pro
+# ---------------------------------------------------------------------------
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, z. B. v0.0.1"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          if (Test-Path src/requirements.txt) {
+            pip install -r src/requirements.txt
+          }
+
+      - name: Build EXE
+        shell: pwsh
+        run: |
+          pyinstaller `
+            --noconfirm `
+            --clean `
+            --windowed `
+            --name "IIS-Setup" `
+            --add-data "data;data" `
+            --add-data "resources_rc.py;." `
+            src/setup.py
+
+      - name: Package ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "dist/IIS-Setup/*" `
+            -DestinationPath "IIS-Setup-${{ inputs.tag }}-windows.zip" `
+            -Force
+
+      - name: Create Git tag
+        shell: pwsh
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git tag "${{ inputs.tag }}"
+          git push origin "${{ inputs.tag }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: IIS Setup ${{ inputs.tag }}
+          files: IIS-Setup-${{ inputs.tag }}-windows.zip
