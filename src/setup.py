@@ -12,8 +12,12 @@ import subprocess
 import tempfile
 import base64
 
+import traceback
+import threading
+
 import ctypes
 from   ctypes import wintypes
+from   copy   import deepcopy
 
 # -----------------------------------------------------------------------
 # Qt Backend Factory + Property Mapping
@@ -30,7 +34,7 @@ from PyQt5.QtWidgets import (
     QMessageBox, QDockWidget, QToolBar, QTextEdit, QComboBox, QHBoxLayout,
     QFormLayout, QLineEdit, QPushButton, QInputDialog, QCheckBox, QDialog,
     QScrollArea, QSizePolicy, QPlainTextEdit, QSplitter, QTabWidget, QTreeWidget,
-    QTreeWidgetItem, QProgressDialog
+    QTreeWidgetItem, QProgressDialog, QDialogButtonBox, QInputDialog,
 )
 
 # -----------------------------------------------------------------------
@@ -39,6 +43,9 @@ from PyQt5.QtWidgets import (
 import resources_rc
 
 from theme import *
+
+from InlineSpinEdit         import InlineSpinEdit
+from user_management_dialog import UserManagementWindow
 
 APP_NAME  = "IIS Setup v.0.0.1 (c) 2026 Jens Kallup - paule32"
 HELP_FILE = os.path.join("data", "help", "help.chm")
@@ -97,6 +104,34 @@ def restart_as_admin():
         1
     )
     sys.exit(0)
+
+
+class ExceptionDialog(QDialog):
+    def __init__(self, title, message, details, parent=None):
+        super().__init__(parent)
+
+        self.setWindowTitle(title)
+        self.resize(900, 520)
+
+        layout = QVBoxLayout(self)
+
+        label = QLabel(message, self)
+        label.setWordWrap(True)
+        layout.addWidget(label)
+
+        self.details = QTextEdit(self)
+        self.details.setReadOnly(True)
+        self.details.setPlainText(details)
+        layout.addWidget(self.details, 1)
+
+        buttons = QHBoxLayout()
+        buttons.addStretch(1)
+
+        close_button = QPushButton("Close", self)
+        close_button.clicked.connect(self.accept)
+
+        buttons.addWidget(close_button)
+        layout.addLayout(buttons)
 
 
 class PowerShellWorker(QThread):
@@ -1438,6 +1473,18 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        if not is_user_admin():
+            result = QMessageBox.warning(self,
+                "Need Admin Rights",
+                "Many parts of this Application need administrative Rights.\n"
+                "Do you want try to re-start with admin rights?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes)
+                
+            if  result == QMessageBox.Yes:
+                restart_as_admin()
+            sys.exit(1)
+
         self.setWindowTitle(APP_NAME)
         self.resize(1000, 700)
         self.setFont(QFont("Arial", 10))
@@ -1542,36 +1589,39 @@ class MainWindow(QMainWindow):
 
         self.act_tile = QAction("Tile", self)
         self.act_tile.triggered.connect(self.mdi.tileSubWindows)
+        
+        self.menu_iis_server_groups_and_users = QAction("User / Groups")
+        self.menu_iis_server_groups_and_users.triggered.connect(self.on_groups_and_users)
 
     def create_menus(self):
         menu_file = self.menuBar().addMenu("File")
 
-        menu_font = QFont("Arial", 10)
+        menu_font = QFont("Arial", 11)
         menu_font.setBold(True)
         self.menuBar().setFont(menu_font)
         self.menuBar().setStyleSheet(f"""
-QMenuBar {{
-    color: #ffd866;
-    font-family: Arial;
-    font-size: 10pt;
-    font-weight: bold;
-}}
-QMenuBar::item {{
-    color: #ffd866;
-}}
-QMenuBar::item:selected {{
-    background-color: #5a1020;
-}}
-QMenu {{
-    color: #ffd866;
-    font-family: Arial;
-    font-size: 10pt;
-    font-weight: bold;
-}}
-QMenu::item:selected {{
-    background-color: #5a1020;
-}}
-""")
+        QMenuBar {{
+            color: #ffd866;
+            font-family: Arial;
+            font-size: 10pt;
+            font-weight: bold;
+        }}
+        QMenuBar::item {{
+            color: #ffd866;
+        }}
+        QMenuBar::item:selected {{
+            background-color: #5a1020;
+        }}
+        QMenu {{
+            color: #ffd866;
+            font-family: Arial;
+            font-size: 10pt;
+            font-weight: bold;
+        }}
+        QMenu::item:selected {{
+            background-color: #5a1020;
+        }}
+        """)
         
         menu_new = menu_file.addMenu("New")
         menu_new.addAction(self.act_new_project)
@@ -1588,6 +1638,9 @@ QMenu::item:selected {{
         menu_file.addSeparator()
         menu_file.addAction(self.act_exit)
 
+        menu_iis_server = self.menuBar().addMenu("IIS Server")
+        menu_iis_server.addAction(self.menu_iis_server_groups_and_users)
+        
         self.menu_windows = self.menuBar().addMenu("Windows")
         self.update_window_menu()
 
@@ -1641,6 +1694,27 @@ QMenu::item:selected {{
         self.update_window_menu()
         return sub
 
+    def open_user_management_dialog_for_project(self, project_file, project_data):
+        existing = self.find_project_window(project_file, "user_management")
+
+        if existing:
+            self.activate_mdi_window(existing)
+            return
+
+        project_name = project_data.get("project", {}).get("name", "Project")
+
+        widget = UserManagementWindow(self, project_data)
+
+        sub = self.add_mdi_widget(
+            widget,
+            f"User Verwaltung [{project_name}]",
+            840,
+            480
+        )
+
+        sub.project_file = os.path.abspath(project_file)
+        sub.window_role = "user_management"
+        
     def on_ca_authority(self):
         #widget = CaAuthorityWindow()
         #self.add_mdi_widget(widget, "CA - Client Authority", 600, 350)
@@ -1649,6 +1723,33 @@ QMenu::item:selected {{
         self.open_client_authority_dialog()
         self.statusBar().showMessage("CA - Client Authority geöffnet")
 
+    def on_groups_and_users(self):
+        if self.current_project_file is None:
+            QMessageBox.warning(self,
+            "Error",
+            "No project is available")
+            return
+            
+        if not is_user_admin():
+            result = QMessageBox.warning(
+                self,
+                "No Admin rights",
+                "Users and Groups can only be displayed, but not create or delete "
+                "without administrative rights.\n"
+                "Would you like restart the Application\n"
+                "with admin rights?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No)
+                
+            if result == QMessageBox.Yes:
+                restart_as_admin()
+            else:
+                return
+            
+        self.open_user_management_dialog_for_project(
+        self.current_project_file,
+        self.current_project_data)
+        
     def on_client_certs(self):
         widget = ClientCertsWindow()
         self.add_mdi_widget(widget, "Client Certs", 700, 500)
@@ -2135,8 +2236,59 @@ if (Test-Path $path) {{
         )
 
 
+# ---------------------------------------------------------------------------
+# \brief setup exception handler output to gui application for python throw
+# ---------------------------------------------------------------------------
+def show_exception_dialog(exc_type, exc_value, exc_traceback):
+    # KeyboardInterrupt normal durchlassen
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    details = "".join(
+        traceback.format_exception(exc_type, exc_value, exc_traceback)
+    )
+
+    with open("error.log", "a", encoding="utf-8") as f:
+        f.write(details)
+        f.write("\n" + "=" * 80 + "\n")
+
+    print(details)
+
+    app = QApplication.instance()
+    if app is None:
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    dlg = ExceptionDialog(
+        "Unhandled Exception",
+        str(exc_value),
+        details,
+        None
+    )
+    dlg.exec_()
+    sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# \brief setup exception handler output to gui application for threaded throw
+# ---------------------------------------------------------------------------
+def show_thread_exception(args):
+    show_exception_dialog(
+        args.exc_type,
+        args.exc_value,
+        args.exc_traceback
+    )
+
+
+# ---------------------------------------------------------------------------
+# \brief this is the main entry point definition to start the qt5 application
+# ---------------------------------------------------------------------------
 def main():
     app = QApplication(sys.argv)
+    
+    sys      .excepthook = show_exception_dialog
+    threading.excepthook = show_thread_exception
 
     window = MainWindow() ; apply_theme_global(window)
     window.show()
@@ -2144,11 +2296,9 @@ def main():
     sys.exit(app.exec_())
 
 
+# ---------------------------------------------------------------------------
+# \brief for python 3.14, this is the point where application starts. when
+#        the interpreter could not found __main__, the app will not start.
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    try:
-        main()
-    except RuntimeError as e:
-        print(e)
-    except Exception as e:
-        print(e)
-        
+    main()

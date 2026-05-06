@@ -238,14 +238,16 @@ QMdiSubWindow:title {{
     background: 0;
     color: #ffffff;
 }}
-QComboBox {{
-    background: #2a2a2a;          /* Feld grau */
+QComboBox,
+QDateEdit {{
+    background-color: #1f1f1f;
     color: #ffffff;
-    border: 1px solid #333333;
-    padding: 6px 10px;
-    padding-right: 28px;          /* Platz für den Pfeil */
+    border: 1px solid #555555;
+    border-radius: 6px;
+    padding: 4px 20px 4px 8px;
+    selection-background-color: #5a1020;
+    selection-color: #ffffff;
 }}
-
 QComboBox:hover {{
     background: #303030;
 }}
@@ -259,7 +261,7 @@ QComboBox:disabled {{
 QComboBox::drop-down {{
     subcontrol-origin: padding;
     subcontrol-position: top right;
-    width: 24px;
+    width: 12px;
     border-left: 1px solid #333333;
     background: #222222;
 }}
@@ -700,7 +702,7 @@ QDateEdit {{
     color: #ffffff;
     border: 1px solid #555555;
     border-radius: 6px;
-    padding: 4px 28px 4px 8px;
+    padding: 4px 14px 4px 8px;
     selection-background-color: #5a1020;
     selection-color: #ffffff;
 }}

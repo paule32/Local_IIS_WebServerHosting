@@ -23,7 +23,7 @@
     },
     "client_certs": [],
     "state": {
-        "dirty": true
+        "dirty": false
     },
     "certificate_snapshot": [
         {
@@ -1566,5 +1566,121 @@
             "NotAfter": "2028-05-03",
             "HasPrivateKey": true
         }
-    ]
+    ],
+    "user_management": {
+        "group_prefix": "IISGRP_",
+        "user_prefix": "IISUSR_",
+        "app_pool_prefix": "IIS_APP_",
+        "groups": [
+            {
+                "name": "IISGRP_0001",
+                "description": "IIS managed group",
+                "users": [
+                    "IISUSR_0001",
+                    "IISUSR_0002"
+                ]
+            },
+            {
+                "name": "IISGRP_0002",
+                "description": "IIS managed group",
+                "users": []
+            },
+            {
+                "name": "IISGRP_0003",
+                "description": "IIS managed group",
+                "users": []
+            }
+        ],
+        "users": [
+            {
+                "system_name": "IISUSR_0001",
+                "name": "IISUSR_0001",
+                "display_name": "IISUSR_0001",
+                "full_name": "IISUSR_0001",
+                "description": "IIS User: IISUSR_0001",
+                "enabled": false,
+                "settings": {
+                    "website": {
+                        "app_pool": "IIS_APP_0001",
+                        "html_path": "S:/IIS/users/client1",
+                        "host_name": "192.168.10.12",
+                        "port": 443,
+                        "use_ssl": false,
+                        "certificate": {
+                            "label": "CN=Meine Test CA, O=My Company Big Fail, OU=IT, L=Erfurt, C=DE",
+                            "not_after": "2036-05-04 00:00:00",
+                            "scope": "CurrentUser",
+                            "store": "My",
+                            "subject": "CN=Meine Test CA, O=My Company Big Fail, OU=IT, L=Erfurt, C=DE",
+                            "thumbprint": "671CEBAB6F627F13338E1C00F034D8907E6A4FDE"
+                        },
+                        "active_state": "BLOCKED"
+                    }
+                },
+                "app_pool": "IIS_APP_0001",
+                "html_path": "S:/IIS/users/client1",
+                "host_name": "192.168.10.12",
+                "port": 443,
+                "use_ssl": false,
+                "certificate": {
+                    "label": "CN=Meine Test CA, O=My Company Big Fail, OU=IT, L=Erfurt, C=DE",
+                    "not_after": "2036-05-04 00:00:00",
+                    "scope": "CurrentUser",
+                    "store": "My",
+                    "subject": "CN=Meine Test CA, O=My Company Big Fail, OU=IT, L=Erfurt, C=DE",
+                    "thumbprint": "671CEBAB6F627F13338E1C00F034D8907E6A4FDE"
+                },
+                "active_state": "BLOCKED"
+            },
+            {
+                "system_name": "IISUSR_0002",
+                "name": "IISUSR_0002",
+                "display_name": "IISUSR_0002",
+                "full_name": "IISUSR_0002",
+                "description": "IIS Setup: IISUSR_0002",
+                "enabled": true,
+                "settings": {
+                    "website": {
+                        "app_pool": "IIS_APP_0002",
+                        "html_path": "",
+                        "host_name": "",
+                        "port": 80,
+                        "use_ssl": false,
+                        "certificate": "",
+                        "active_state": "YES"
+                    }
+                },
+                "app_pool": "IIS_APP_0002",
+                "html_path": "",
+                "host_name": "",
+                "port": 80,
+                "use_ssl": false,
+                "certificate": "",
+                "active_state": "YES"
+            }
+        ],
+        "app_pools": [
+            {
+                "name": "IIS_APP_0001"
+            },
+            {
+                "name": "IIS_APP_0002"
+            },
+            {
+                "name": "IIS_APP_IISC_0001"
+            },
+            {
+                "name": "IIS_APP_IISC_0002"
+            },
+            {
+                "name": "IIS_APP_IISC_0003"
+            },
+            {
+                "name": "IIS_APP_IISC_0004"
+            },
+            {
+                "name": "IIS_APP_New_Project_"
+            }
+        ]
+    }
 }

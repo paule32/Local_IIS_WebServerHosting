@@ -5,3 +5,4 @@ src/setup_additive.py
 src/setup_saveas_dirty.py
 /tmp
 src/setup_cert_sync.py
+src/error.log
