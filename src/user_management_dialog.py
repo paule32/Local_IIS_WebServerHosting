@@ -37,7 +37,7 @@ from PyQt5.QtWidgets import (
     QWidget, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QSplitter,
     QTreeWidget, QTreeWidgetItem, QMessageBox, QInputDialog, QLineEdit, QDialogButtonBox,
     QGroupBox, QPlainTextEdit, QFileDialog, QStyledItemDelegate, QSpinBox, QCheckBox,
-    QComboBox,
+    QComboBox, QProgressDialog, QApplication,
 )
 from InlineSpinEdit import InlineSpinEdit
 
@@ -1096,24 +1096,58 @@ class UserManagementWindow(QWidget):
             return
         if not self.ask_save_current_user_changes():
             return
-        self.refresh_user_tree()
+        progress = self.show_loading_progress(
+            "User Management",
+            "Benutzerinformationen der ausgewählten Gruppe werden geladen ..."
+        )
+        try:
+            self.refresh_user_tree()
+        finally:
+            self.close_loading_progress(progress)
+
+    def show_loading_progress(self, title="User Management", text="Benutzerinformationen werden geladen ..."):
+        progress = QProgressDialog(text, None, 0, 0, self)
+        progress.setWindowTitle(title)
+        progress.setWindowModality(Qt.ApplicationModal)
+        progress.setCancelButton(None)
+        progress.setMinimumDuration(0)
+        progress.setAutoClose(False)
+        progress.setAutoReset(False)
+        progress.show()
+        QApplication.processEvents()
+        return progress
+
+    def close_loading_progress(self, progress):
+        if progress is not None:
+            progress.close()
+            progress.deleteLater()
+            QApplication.processEvents()
 
     def reload_from_system(self):
+        progress = self.show_loading_progress(
+            "User Management",
+            "Benutzergruppen, Benutzer und Zertifikate werden geladen ..."
+        )
         try:
-            self.certificates = self.backend.get_certificates()
-        except Exception:
-            self.certificates = []
-        try:
-            system_snapshot = self.backend.get_snapshot()
-            project_snapshot = normalize_snapshot(self.project_data.get("user_management", {}))
-            self.snapshot = merge_snapshots(project_snapshot, system_snapshot)
-        except Exception as exc:
-            QMessageBox.warning(self, "User Management", "Systemdaten konnten nicht gelesen werden. Projekt-Snapshot wird verwendet.\n\n" + str(exc))
-            self.snapshot = normalize_snapshot(self.project_data.get("user_management", {}))
-        self.project_data["user_management"] = deepcopy(self.snapshot)
-        self._saved_snapshot = normalize_snapshot(self.snapshot)
-        self._dirty = False
-        self.refresh_group_tree()
+            try:
+                self.certificates = self.backend.get_certificates()
+                QApplication.processEvents()
+            except Exception:
+                self.certificates = []
+            try:
+                system_snapshot = self.backend.get_snapshot()
+                QApplication.processEvents()
+                project_snapshot = normalize_snapshot(self.project_data.get("user_management", {}))
+                self.snapshot = merge_snapshots(project_snapshot, system_snapshot)
+            except Exception as exc:
+                QMessageBox.warning(self, "User Management", "Systemdaten konnten nicht gelesen werden. Projekt-Snapshot wird verwendet.\n\n" + str(exc))
+                self.snapshot = normalize_snapshot(self.project_data.get("user_management", {}))
+            self.project_data["user_management"] = deepcopy(self.snapshot)
+            self._saved_snapshot = normalize_snapshot(self.snapshot)
+            self._dirty = False
+            self.refresh_group_tree()
+        finally:
+            self.close_loading_progress(progress)
 
     def refresh_group_tree(self):
         current = self.selected_group_name()
@@ -1159,12 +1193,15 @@ class UserManagementWindow(QWidget):
         all_users = {u.get("system_name", ""): u for u in self.snapshot.get("users", [])}
         for system_name in sorted(group_users, key=str.lower):
             user = all_users.get(system_name)
+            
             if not user:
                 continue
+            
             root = QTreeWidgetItem([system_name, user.get("full_name", system_name), "Ja" if user.get("enabled") else "Nein"])
             root.setData(0, Qt.UserRole, ROLE_USER)
             root.setData(1, Qt.UserRole, system_name)
             root.setFlags(root.flags() & ~Qt.ItemIsEditable)
+            
             self.user_tree.addTopLevelItem(root)
             self.make_property_item(root, "AppPool", ROLE_APP_POOL, get_user_app_pool(user), system_name)
             
@@ -1209,7 +1246,14 @@ class UserManagementWindow(QWidget):
             spin.spin.setValue(get_user_port(user))
             spin.spin.setFont(QFont(FONT_FAMILY, FONT_POINT_SIZE))
             spin.spin.valueChanged.connect(lambda value, sn=system_name: self.set_user_setting(sn, "port", value))
+            
+            port_button = QPushButton("Port List", self.user_tree)
+            port_button.setFont(QFont(FONT_FAMILY, FONT_POINT_SIZE))
+            port_button.clicked.connect(
+                lambda _checked=False, item=check_item: self.check_portlist_item(port_button)
+            )
             self.user_tree.setItemWidget(port_item, 1, spin)
+            self.user_tree.setItemWidget(port_item, 2, port_button)
             
             ssl_item = self.make_property_item(root, "Use SSL", ROLE_USE_SSL, "", system_name, editable=False)
             chk = QCheckBox(self.user_tree)
@@ -1385,6 +1429,12 @@ class UserManagementWindow(QWidget):
 
         self.set_user_setting(system_name, "certificate", value)
         self.update_certificate_detail_items(system_name, value)
+
+    def check_portlist_item(self, button):
+        QMessageBox.warning(self,
+        "TODO",
+        "ToDo: port list")
+        return
 
     def on_use_ssl_changed(self, system_name, checkbox, state):
         checked = state == Qt.Checked

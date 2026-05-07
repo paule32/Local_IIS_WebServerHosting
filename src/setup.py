@@ -45,6 +45,7 @@ import resources_rc
 from theme import *
 
 from InlineSpinEdit         import InlineSpinEdit
+from timewindow_dialog      import TimeWindowRules
 from user_management_dialog import UserManagementWindow
 
 APP_NAME  = "IIS Setup v.0.0.1 (c) 2026 Jens Kallup - paule32"
@@ -1592,6 +1593,9 @@ class MainWindow(QMainWindow):
         
         self.menu_iis_server_groups_and_users = QAction("User / Groups")
         self.menu_iis_server_groups_and_users.triggered.connect(self.on_groups_and_users)
+        
+        self.menu_iis_server_time_windows = QAction("Time Windows")
+        self.menu_iis_server_time_windows.triggered.connect(self.on_time_windows)
 
     def create_menus(self):
         menu_file = self.menuBar().addMenu("File")
@@ -1640,6 +1644,7 @@ class MainWindow(QMainWindow):
 
         menu_iis_server = self.menuBar().addMenu("IIS Server")
         menu_iis_server.addAction(self.menu_iis_server_groups_and_users)
+        menu_iis_server.addAction(self.menu_iis_server_time_windows)
         
         self.menu_windows = self.menuBar().addMenu("Windows")
         self.update_window_menu()
@@ -1715,6 +1720,27 @@ class MainWindow(QMainWindow):
         sub.project_file = os.path.abspath(project_file)
         sub.window_role = "user_management"
         
+    def open_time_window_dialog_for_project(self, project_file, project_data):
+        existing = self.find_project_window(project_file, "timewindow_management")
+
+        if existing:
+            self.activate_mdi_window(existing)
+            return
+
+        project_name = project_data.get("project", {}).get("name", "Project")
+
+        widget = TimeWindowRules(self, project_data)
+
+        sub = self.add_mdi_widget(
+            widget,
+            f"Time Windows [{project_name}]",
+            800,
+            480
+        )
+
+        sub.project_file = os.path.abspath(project_file)
+        sub.window_role = "timewindow_management"
+        
     def on_ca_authority(self):
         #widget = CaAuthorityWindow()
         #self.add_mdi_widget(widget, "CA - Client Authority", 600, 350)
@@ -1723,6 +1749,17 @@ class MainWindow(QMainWindow):
         self.open_client_authority_dialog()
         self.statusBar().showMessage("CA - Client Authority geöffnet")
 
+    def on_time_windows(self):
+        if self.current_project_file is None:
+            QMessageBox.warning(self,
+            "Error",
+            "No project is available")
+            return
+            
+        self.open_time_window_dialog_for_project(
+        self.current_project_file,
+        self.current_project_data)
+        
     def on_groups_and_users(self):
         if self.current_project_file is None:
             QMessageBox.warning(self,

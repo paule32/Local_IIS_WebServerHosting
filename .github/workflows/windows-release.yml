@@ -48,8 +48,11 @@ jobs:
             --clean `
             --windowed `
             --name "IIS-Setup" `
-            --add-data "src/resources_rc.py;." `
-            src/setup.py
+            --add-data `
+            "src/resources_rc.py;." `
+            "src/setup.py;." `
+            "src/user_management_dialog.py;." `
+            "src/timewindow_dialog.py;."
 
       - name: Package ZIP
         shell: pwsh
