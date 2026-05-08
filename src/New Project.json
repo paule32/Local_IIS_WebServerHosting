@@ -1614,7 +1614,2059 @@
                             "subject": "CN=Meine Test CA, O=My Company Big Fail, OU=IT, L=Erfurt, C=DE",
                             "thumbprint": "671CEBAB6F627F13338E1C00F034D8907E6A4FDE"
                         },
-                        "active_state": "BLOCKED"
+                        "active_state": "BLOCKED",
+                        "availability_grid": {
+                            "date": "2026-05-07",
+                            "grid": [
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 3,
+                                        "path": "",
+                                        "text": "123123",
+                                        "enabled": 1
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 2,
+                                        "path": "S:/IIS/servers/src/__pycache__/setup.cpython-314.pyc",
+                                        "text": "",
+                                        "enabled": 1
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ],
+                                [
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    },
+                                    {
+                                        "mode": 1,
+                                        "path": "",
+                                        "text": "",
+                                        "enabled": 0
+                                    }
+                                ]
+                            ]
+                        },
+                        "availability_rules": [
+                            {
+                                "enabled": true,
+                                "mode": "allowed",
+                                "day": "MO",
+                                "from": "00:30",
+                                "to": "01:00"
+                            },
+                            {
+                                "enabled": true,
+                                "mode": "allowed",
+                                "day": "MO",
+                                "from": "01:30",
+                                "to": "02:00"
+                            }
+                        ],
+                        "availability_date": "2026-05-07"
                     }
                 },
                 "app_pool": "IIS_APP_0001",
@@ -1682,5 +3734,12 @@
                 "name": "IIS_APP_New_Project_"
             }
         ]
+    },
+    "website_wizard": {
+        "host_name": "tttt",
+        "port": "80",
+        "use_ssl": true,
+        "title": "vvv",
+        "description": "vv"
     }
 }

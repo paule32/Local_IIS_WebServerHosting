@@ -44,9 +44,11 @@ import resources_rc
 
 from theme import *
 
-from InlineSpinEdit         import InlineSpinEdit
-from timewindow_dialog      import TimeWindowRules
-from user_management_dialog import UserManagementWindow
+from InlineSpinEdit             import InlineSpinEdit
+from timewindow_dialog          import TimeWindowRules
+from header_footer_dialog       import WebsiteHeaderFooterWindow
+from user_management_dialog     import UserManagementWindow
+from write_config_wizard_dialog import open_website_wizard
 
 APP_NAME  = "IIS Setup v.0.0.1 (c) 2026 Jens Kallup - paule32"
 HELP_FILE = os.path.join("data", "help", "help.chm")
@@ -1596,6 +1598,12 @@ class MainWindow(QMainWindow):
         
         self.menu_iis_server_time_windows = QAction("Time Windows")
         self.menu_iis_server_time_windows.triggered.connect(self.on_time_windows)
+        
+        self.menu_iis_server_header_footer = QAction("Header / Footer")
+        self.menu_iis_server_header_footer.triggered.connect(self.on_header_footer)
+        
+        self.menu_iis_server_write_config = QAction("Write Config ...")
+        self.menu_iis_server_write_config.triggered.connect(self.on_write_config)
 
     def create_menus(self):
         menu_file = self.menuBar().addMenu("File")
@@ -1645,6 +1653,9 @@ class MainWindow(QMainWindow):
         menu_iis_server = self.menuBar().addMenu("IIS Server")
         menu_iis_server.addAction(self.menu_iis_server_groups_and_users)
         menu_iis_server.addAction(self.menu_iis_server_time_windows)
+        menu_iis_server.addSeparator()
+        menu_iis_server.addAction(self.menu_iis_server_header_footer)
+        menu_iis_server.addAction(self.menu_iis_server_write_config)
         
         self.menu_windows = self.menuBar().addMenu("Windows")
         self.update_window_menu()
@@ -1740,7 +1751,28 @@ class MainWindow(QMainWindow):
 
         sub.project_file = os.path.abspath(project_file)
         sub.window_role = "timewindow_management"
-        
+    
+    def open_header_footer_dialog_for_project(self, project_file, project_data):
+        existing = self.find_project_window(project_file, "headerfooter_management")
+
+        if existing:
+            self.activate_mdi_window(existing)
+            return
+
+        project_name = project_data.get("project", {}).get("name", "Project")
+
+        widget = WebsiteHeaderFooterWindow(self, project_data)
+
+        sub = self.add_mdi_widget(
+            widget,
+            f"Time Windows [{project_name}]",
+            600,
+            480
+        )
+
+        sub.project_file = os.path.abspath(project_file)
+        sub.window_role = "headerfooter_management"
+    
     def on_ca_authority(self):
         #widget = CaAuthorityWindow()
         #self.add_mdi_widget(widget, "CA - Client Authority", 600, 350)
@@ -1757,6 +1789,28 @@ class MainWindow(QMainWindow):
             return
             
         self.open_time_window_dialog_for_project(
+        self.current_project_file,
+        self.current_project_data)
+    
+    def on_header_footer(self):
+        if self.current_project_file is None:
+            QMessageBox.warning(self,
+            "Error",
+            "No project is available")
+            return
+            
+        self.open_header_footer_dialog_for_project(
+        self.current_project_file,
+        self.current_project_data)
+    
+    def on_write_config(self):
+        if self.current_project_file is None:
+            QMessageBox.warning(self,
+            "Error",
+            "No project is available")
+            return
+            
+        open_website_wizard( self,
         self.current_project_file,
         self.current_project_data)
         
