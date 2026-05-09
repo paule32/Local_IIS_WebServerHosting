@@ -1,0 +1,22 @@
+{
+  "host_name": "client1.servera",
+  "availability_grid": {
+    "date": "2026-05-07",
+    "grid": [
+      [
+        {
+          "enabled": 0,
+          "mode": 1,
+          "path": "",
+          "text": ""
+        },
+        {
+          "enabled": 1,
+          "mode": 3,
+          "path": "",
+          "text": "<h1>Wartung</h1><p>Diese Website ist gerade gesperrt.</p>"
+        }
+      ]
+    ]
+  }
+}

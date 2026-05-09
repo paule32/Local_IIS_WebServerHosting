@@ -49,7 +49,8 @@ jobs:
             --windowed `
             --name "IIS-Setup" `
             --add-data "src/resources_rc.py;." `
-            src/setup.py src/user_management_dialog.py src/timewindow_dialog.py
+            src/setup.py src/theme.py src/user_management_dialog.py src/timewindow_dialog.py `
+            src/InlineSpinEdit.py src/header_footer_dialog.py src/write_config_wizard_dialog.py
 
       - name: Package ZIP
         shell: pwsh
